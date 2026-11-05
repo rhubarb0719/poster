@@ -17,8 +17,8 @@ def _len(s):
     return sum(0.5 if ch.isascii() else 1 for ch in s)
 
 
-COMPARE_FIELDS = {"主标题", "副标题", "产品1", "产品2", "场景", "参考图"}
-COMPARE_LIMITS = {"主标题": 6, "副标题": 4}
+COMPARE_FIELDS = {"主标题", "副标题", "钩子", "产品1", "产品2", "场景", "参考图"}
+COMPARE_LIMITS = {"主标题": 6, "副标题": 4, "钩子": 8}
 
 
 def _product_risk(desc):
@@ -26,11 +26,11 @@ def _product_risk(desc):
 
 
 def check_compare(content, images=None):
-    """对比图（风格3）内容：主标题 ≤6 字、副标题 ≤4 字、两个产品只写外观。"""
+    """对比图（风格3）内容：主标题 ≤6 字、副标题 ≤4 字、钩子 ≤8 字、两个产品只写外观。"""
     out = []
     err = lambda m: out.append(("ERROR", m))
     warn = lambda m: out.append(("WARN", m))
-    for k in ("主标题", "副标题", "产品1", "产品2"):
+    for k in ("主标题", "副标题", "钩子", "产品1", "产品2"):
         if not str(content.get(k, "")).strip():
             err(f"缺少字段或为空：{k}")
     for k in set(content) - COMPARE_FIELDS:
