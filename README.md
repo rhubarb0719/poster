@@ -8,7 +8,6 @@
 
 ```
 docs/开发对接说明.md      开发先读：流程、参数、注意事项
-docs/qwen-image-3.0-pro接入文档.md   接口官方文档
 styles/style1-sticker/   风格1：小红书贴纸字（prompt + 样图）
 styles/style2-collage/   风格2：杂志手账拼贴（prompt + 样图）
 styles/style3/           风格3（待定）
