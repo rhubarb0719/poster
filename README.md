@@ -1,71 +1,52 @@
-# poster · 小红书家电种草封面生成
+# poster · 小红书冰箱种草封面
 
-用 `qwen-image-3.0-pro`（CR 统一接口）按「固定风格 + 每次替换的内容 + 随机版式」生成竖版 3:4 家电封面海报。
-同一风格下画风一致，标题、产品、卖点的位置和样式每张不同。
+用 `qwen-image-3.0-pro` 生成 3:4 竖版封面：**风格固定，版式随机**（标题、产品、卖点的位置和样式每张不同）。
+
+> ⚠️ 当前文字（`examples/`）和样图均为**测试内容**，品牌方最终文字和产品图确认后替换。
 
 ## 目录
 
 ```
-poster/
-├── README.md                    ← 你在这里：总览
-├── docs/
-│   ├── 开发对接说明.md           ← 开发先读：调用流程、参数、注意事项
-│   ├── 替换最终内容清单.md       ← 换成品牌方最终文字和产品图的步骤
-│   └── qwen-image-3.0-pro接入文档.md   ← CR 官方接入文档原文
-├── styles/                      ← 每种风格一个文件夹（prompt + 图片参考）
-│   ├── README.md                ← 风格索引
-│   ├── style1-sticker/          ← 风格1：小红书贴纸字（已定稿）
-│   │   ├── README.md            ← prompt 全文、随机项、样图
-│   │   ├── style.json           ← 程序读取的风格配置
-│   │   ├── samples.json         ← v2 样图的完整 prompt / seed / task_id
-│   │   └── samples_v1.json      ← v1（调整前）样图记录
-│   ├── style2-collage/          ← 风格2：杂志手账拼贴（调试中）
-│   ├── style3/                  ← 风格3（待定）
-│   └── _template/               ← 新建风格时复制这个
-├── src/poster/                  ← 代码（仅 Python 3 标准库，无第三方依赖）
-│   ├── prompt.py                ← 读取 style.json，拼 prompt / 请求体
-│   ├── check.py                 ← 内容检查（字段、长度、段数、引号、产品图）
-│   ├── client.py                ← CR 接口：提交、等待、下载
-│   └── cli.py                   ← 命令行
-├── assets/products/             ← 品牌方产品图（默认不入库）
-├── examples/
-│   ├── keywords/冰箱.json        ← 冰箱关键词库（产品 / 主标题 / 副标题 / 卖点，按长度分组）
-│   └── content/                 ← 内容示例：简单.json / 中等.json / 压力.json
-└── tests/
-    └── text-stress/             ← 文字压力测试记录（inputs/ 为当时实际使用的内容）
+docs/开发对接说明.md      开发先读：流程、参数、注意事项
+docs/qwen-image-3.0-pro接入文档.md   接口官方文档
+styles/style1-sticker/   风格1：小红书贴纸字（prompt + 样图）
+styles/style2-collage/   风格2：杂志手账拼贴（prompt + 样图）
+styles/style3/           风格3（待定）
+styles/_template/        新建风格时复制
+src/poster/              代码（仅 Python 标准库）
+examples/content/中等.json   内容示例（标准格式）
+examples/keywords/冰箱.json  关键词库（待品牌方确认后修改）
+assets/products/         品牌产品图（默认不入库）
+tests/difficulty/        难度分档测试记录（gallery.html 一页看全部）
 ```
 
-> ⚠️ **当前文字和样图均为测试内容**，品牌方最终内容替换步骤见 [docs/替换最终内容清单.md](docs/替换最终内容清单.md)。
-
-## 快速开始
+## 用法
 
 ```bash
-export CR_API_KEY=你的完整密钥
-export PYTHONPATH=src
+export CR_API_KEY=你的完整密钥 PYTHONPATH=src
 ```
 
 ```bash
-python3 -m poster styles
+python3 -m poster check examples/content/中等.json
 ```
-
-只看拼出来的 prompt（不调用接口、不扣费）：
 
 ```bash
-python3 -m poster prompt --style style1-sticker --content examples/content/简单.json --random 7
+python3 -m poster prompt --style style1-sticker --content examples/content/中等.json --random 1
 ```
-
-出图（随机 6 种版式，每种 1 张）：
 
 ```bash
-python3 -m poster generate --style style1-sticker --content examples/content/简单.json --count 6
+python3 -m poster generate --style style1-sticker --content examples/content/中等.json --count 6
 ```
 
-结果写在 `output/<时间>/`（已加入 .gitignore）：图片文件 + `result.json`（prompt、参数、task_id、图片链接）。
+`check` 检查内容，`prompt` 只看拼好的 prompt（都不扣费）；`generate` 出图，结果在 `output/<时间>/result.json`。
 
-## 风格
+## 规则
 
-| 风格 | 状态 | 说明 |
-|---|---|---|
-| [风格1：小红书贴纸字](styles/style1-sticker/README.md) | 已定稿（v2） | 白/黑/柠檬黄 + 强调色，超粗黑体贴纸字标题；颜色、标题位置与字号、产品位置/大小/角度、卖点排布与字号随机组合 |
-| [风格2：杂志手账拼贴](styles/style2-collage/README.md) | 调试中 | 奶黄 + 米灰 + 黑的杂志手账拼贴（v2），网格纸、撕边纸、胶带、手绘箭头、圆形色块 |
-| [风格3](styles/style3/README.md) | 待定 | — |
+| 项 | 规则 |
+|---|---|
+| 文字 | 统一用**中等难度**：主标题约 7–12 字，副标题 ≤10 字，**3 个卖点**（最多 1 个超过 8 字），共 5 段。依据：中等档乱码 1/12 |
+| 产品大小 | 占画面高度 **55%–75%**，每张随机 |
+| 产品描述 | 只写中文外观，不写英文、型号（会被印到产品上）；型号要展示就放进卖点 |
+| 引号 | 文字里用中文引号“”，不用英文 `"` |
+| 并发 | ≤3，遇到 `upstream_rate_limited` 等待后重新提交（代码已处理） |
+| 图片链接 | 会过期，出图后立即转存 |

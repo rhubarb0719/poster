@@ -1,8 +1,8 @@
 """命令行入口。
 
   python3 -m poster styles
-  python3 -m poster prompt   --style style1-sticker --content examples/content/简单.json [--random 7 | --pick 1,1,2,...]
-  python3 -m poster generate --style style1-sticker --content examples/content/简单.json [--count 6] [--n 1] [--image ref.png]
+  python3 -m poster prompt   --style style1-sticker --content examples/content/中等.json [--random 7 | --pick 1,1,2,...]
+  python3 -m poster generate --style style1-sticker --content examples/content/中等.json [--count 6] [--n 1] [--image ref.png]
 
 需要环境变量 CR_API_KEY（generate）。结果在 output/<时间>/：result.json 记录 prompt、参数、task_id、图片链接。
 """

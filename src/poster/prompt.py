@@ -54,6 +54,7 @@ def build(style, content, idx):
         "副标题": content["副标题"],
         "产品": product,
         "卖点": "".join(f'"{p}"' for p in content["卖点"]),
+        "卖点数": len(content["卖点"]),
         **{c: style["options"][c][i - 1] for c, i in idx.items()},
     }
     if content.get("产品名"):  # 有参考图时，部分类别（如产品角度）固定为跟随参考图

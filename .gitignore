@@ -1,0 +1,7 @@
+output/
+__pycache__/
+*.pyc
+.env
+# 品牌产品图默认不入库
+assets/products/*
+!assets/products/README.md

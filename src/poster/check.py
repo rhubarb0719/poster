@@ -41,22 +41,25 @@ def check_content(content, images=None):
         if '"' in t:
             err(f"{name}「{t}」含英文双引号，会打乱 prompt；请改用中文引号“”")
         limit = LIMITS.get(re.sub(r"\d+$", "", name))
+        if name.startswith("卖点"):
+            limit = None  # 卖点长度按“最多 1 个长卖点”统一判断
         if limit and _len(t) > limit:
             warn(f"{name}「{t}」约 {_len(t):g} 字，超过建议的 {limit} 字（英文按半字计），错字风险更高")
     seen = [t for _, t in texts]
     for t in {t for t in seen if seen.count(t) > 1}:
         warn(f"文字「{t}」重复出现")
 
-    n = 2 + len(points)
-    if n > 5:
-        warn(f"图上文字共 {n} 段（主标题 + 副标题 + {len(points)} 个卖点），超过建议的 5 段，乱码风险高")
-    if 0 < len(points) < 3:
-        warn(f"卖点只有 {len(points)} 个，版式按 3 个设计，画面可能偏空")
+    # 中等难度标准：3 个卖点、最多 1 个长卖点、共 5 段（2026-11-04 审核确认）
+    if points and len(points) != 3:
+        warn(f"卖点 {len(points)} 个，中等难度标准为 3 个（共 5 段文字）；多了乱码风险高，少了画面偏空")
+    long_points = [p for p in points if _len(p) > LIMITS["卖点"]]
+    if len(long_points) > 1:
+        warn(f"长卖点（超过 {LIMITS['卖点']} 字）有 {len(long_points)} 个：{long_points}，中等难度标准最多 1 个")
 
     product = content.get("产品", "")
-    risky = re.findall(r"\b[A-Za-z]*\d[A-Za-z0-9-]*\b|\bbosch\b", product, re.I)  # 型号、英文品牌名
+    risky = re.findall(r"[A-Za-z0-9][A-Za-z0-9 -]*[A-Za-z0-9]|[A-Za-z0-9]", product)  # 英文、型号、数字
     if risky and not content.get("产品名"):
-        warn(f"产品描述含型号或英文品牌名 {risky}，模型可能把它画到图上；产品描述只写外观，型号请放进卖点")
+        warn(f"产品描述含英文或数字 {risky}，模型会把它印到产品上（实测“slot in”被印在门板上）；产品描述只写中文外观，型号请放进卖点")
 
     if content.get("产品名") and not images:
         warn("填写了产品名（参考图模式），但没有提供产品图，出图时请加 --image")
