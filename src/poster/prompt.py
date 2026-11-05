@@ -41,24 +41,37 @@ def pick(style, mode="first", seed=None, indices=None):
             return idx
 
 
+class _Keep(dict):
+    """format_map 用：没有的占位符原样保留。"""
+    def __missing__(self, key):
+        return "{" + key + "}"
+
+
 def build(style, content, idx):
-    """content: {"主标题", "副标题", "产品", "卖点": [..]}，可选 "产品名"（有参考图时用）。
-    返回 (prompt, negative_prompt)。"""
-    product = content["产品"]
-    if content.get("产品名"):  # 有产品参考图：产品描述改为“保持参考图不变”
-        product = style["产品来自参考图"].format(产品名=content["产品名"])
-    values = {
-        "风格": style["风格"],
-        "文字约束": style["文字约束"],
-        "主标题": content["主标题"],
-        "副标题": content["副标题"],
-        "产品": product,
-        "卖点": "".join(f'"{p}"' for p in content["卖点"]),
-        "卖点数": len(content["卖点"]),
-        **{c: style["options"][c][i - 1] for c, i in idx.items()},
-    }
-    if content.get("产品名"):  # 有参考图时，部分类别（如产品角度）固定为跟随参考图
-        values.update(style.get("参考图时固定", {}))
+    """拼 prompt，返回 (prompt, negative_prompt)。
+
+    content 的文字字段（主标题、副标题、产品、产品1、产品2、场景…）都可在 template / 选项 / 风格 / 文字约束中用 {字段名} 引用。
+    卖点（列表）展开为 {卖点}（逐个加引号）和 {卖点数}。
+    可选：产品名（单产品参考图）、参考图: true（多产品参考图，用 style 的“参考图替换”）。
+    style 可选：默认值（缺省字段）、联动（抽到某选项时追加变量）、参考图时固定（覆盖某些类别）。
+    """
+    base = dict(style.get("默认值", {}))
+    base.update({k: v for k, v in content.items() if isinstance(v, str)})
+    if "卖点" in content:
+        base["卖点"] = "".join(f'"{p}"' for p in content["卖点"])
+        base["卖点数"] = len(content["卖点"])
+    if content.get("产品名"):  # 单产品参考图：产品描述改为“保持参考图不变”
+        base["产品"] = style["产品来自参考图"].format(产品名=content["产品名"])
+    if content.get("参考图"):  # 多产品参考图：如“图1中的产品”
+        base.update(style.get("参考图替换", {}))
+    for c, i in idx.items():
+        base.update(style.get("联动", {}).get(c, {}).get(str(i), {}))
+    chosen = {c: style["options"][c][i - 1] for c, i in idx.items()}
+    if content.get("产品名") or content.get("参考图"):
+        chosen.update(style.get("参考图时固定", {}))
+    fmt = lambda s: s.format_map(_Keep(base))
+    values = {**base, **{c: fmt(v) for c, v in chosen.items()},
+              "风格": fmt(style["风格"]), "文字约束": fmt(style["文字约束"])}
     return "".join(seg.format(**values) for seg in style["template"]), style["negative_prompt"]
 
 

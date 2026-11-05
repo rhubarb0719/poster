@@ -17,7 +17,47 @@ def _len(s):
     return sum(0.5 if ch.isascii() else 1 for ch in s)
 
 
+COMPARE_FIELDS = {"主标题", "副标题", "产品1", "产品2", "场景", "参考图"}
+COMPARE_LIMITS = {"主标题": 6, "副标题": 4}
+
+
+def _product_risk(desc):
+    return re.findall(r"[A-Za-z0-9][A-Za-z0-9 -]*[A-Za-z0-9]|[A-Za-z0-9]", desc)  # 英文、型号、数字
+
+
+def check_compare(content, images=None):
+    """对比图（风格3）内容：主标题 ≤6 字、副标题 ≤4 字、两个产品只写外观。"""
+    out = []
+    err = lambda m: out.append(("ERROR", m))
+    warn = lambda m: out.append(("WARN", m))
+    for k in ("主标题", "副标题", "产品1", "产品2"):
+        if not str(content.get(k, "")).strip():
+            err(f"缺少字段或为空：{k}")
+    for k in set(content) - COMPARE_FIELDS:
+        warn(f"未知字段 {k}，不会进入 prompt")
+    for k, limit in COMPARE_LIMITS.items():
+        t = content.get(k, "")
+        if '"' in t:
+            err(f"{k}「{t}」含英文双引号，会打乱 prompt；请改用中文引号“”")
+        if _len(t) > limit:
+            warn(f"{k}「{t}」约 {_len(t):g} 字，对比图建议不超过 {limit} 字")
+    if not content.get("参考图"):
+        for k in ("产品1", "产品2"):
+            risky = _product_risk(content.get(k, ""))
+            if risky:
+                warn(f"{k} 描述含英文或数字 {risky}，可能被印到产品上；只写中文外观")
+    if content.get("参考图") and (not images or len(images) != 2):
+        warn("参考图模式需要 2 张产品图（图1 左、图2 右），出图时加 --image 图1 图2")
+    return out
+
+
 def check_content(content, images=None):
+    if "产品1" in content or "产品2" in content:
+        out = check_compare(content, images)
+        for src in images or []:
+            if not src.startswith(("https://", "data:")) and not Path(src).exists():
+                out.append(("ERROR", f"产品图不存在：{src}"))
+        return out
     out = []
     err = lambda m: out.append(("ERROR", m))
     warn = lambda m: out.append(("WARN", m))

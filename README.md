@@ -10,10 +10,11 @@
 docs/开发对接说明.md      开发先读：流程、参数、注意事项
 styles/style1-sticker/   风格1：小红书贴纸字（prompt + 样图）
 styles/style2-collage/   风格2：杂志手账拼贴（prompt + 样图）
-styles/style3/           风格3（待定）
+styles/style3-compare/   风格3：双产品对比图（调试中）
 styles/_template/        新建风格时复制
 src/poster/              代码（仅 Python 标准库）
-examples/content/中等.json   内容示例（标准格式）
+examples/content/中等.json   内容示例（风格1、2）
+examples/content/对比.json   内容示例（风格3）
 examples/keywords/冰箱.json  关键词库（待品牌方确认后修改）
 assets/products/         品牌产品图（默认不入库）
 tests/difficulty/        难度分档测试记录（gallery.html 一页看全部）
