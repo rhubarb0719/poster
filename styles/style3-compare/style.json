@@ -1,7 +1,7 @@
 {
   "id": "style3-compare",
   "name": "风格3：双产品对比图",
-  "status": "调试中",
+  "status": "已定稿",
   "version": "v2",
   "params": {
     "model": "qwen-image-3.0-pro",

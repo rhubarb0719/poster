@@ -10,7 +10,7 @@
 docs/开发对接说明.md      开发先读：流程、参数、注意事项
 styles/style1-sticker/   风格1：小红书贴纸字（prompt + 样图）
 styles/style2-collage/   风格2：杂志手账拼贴（prompt + 样图）
-styles/style3-compare/   风格3：双产品对比图（调试中）
+styles/style3-compare/   风格3：双产品对比图（已定稿）
 styles/_template/        新建风格时复制
 src/poster/              代码（仅 Python 标准库）
 examples/content/中等.json   内容示例（风格1、2）
