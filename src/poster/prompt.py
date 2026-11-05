@@ -26,18 +26,25 @@ def _conflicts(style, idx):
     return any(all(idx.get(k) == v for k, v in rule.items()) for rule in style.get("conflicts", []))
 
 
-def pick(style, mode="first", seed=None, indices=None):
+def _pools(content):
+    """内容里的列表字段（卖点除外）是候选池，每张图抽一句，如 "钩子": ["一篇看懂怎么选", "装修党必看"]。"""
+    return {k: v for k, v in (content or {}).items() if isinstance(v, list) and k != "卖点"}
+
+
+def pick(style, mode="first", seed=None, indices=None, content=None):
     """选随机项。mode: first（每类第 1 项）/ random（按 seed 随机，自动跳过冲突组合）/ index（indices 手动指定，1 起）。
-    返回 {类别: 选项序号}。"""
+    返回 {类别: 选项序号}；内容候选池的选择记为 {"@字段": 序号}（first / index 模式取第 1 句）。"""
     cats = list(style["options"])
+    pools = _pools(content)
     if mode == "first":
-        return {c: 1 for c in cats}
+        return {**{c: 1 for c in cats}, **{f"@{k}": 1 for k in pools}}
     if mode == "index":
-        return dict(zip(cats, indices))
+        return {**dict(zip(cats, indices)), **{f"@{k}": 1 for k in pools}}
     rng = random.Random(seed)
     while True:
         idx = {c: rng.randint(1, len(style["options"][c])) for c in cats}
         if not _conflicts(style, idx):
+            idx.update({f"@{k}": rng.randint(1, len(v)) for k, v in pools.items()})
             return idx
 
 
@@ -57,6 +64,9 @@ def build(style, content, idx):
     """
     base = dict(style.get("默认值", {}))
     base.update({k: v for k, v in content.items() if isinstance(v, str)})
+    for k, pool in _pools(content).items():  # 候选池：按 idx 中的 @字段 取一句
+        base[k] = pool[idx.get(f"@{k}", 1) - 1]
+    idx = {c: i for c, i in idx.items() if not c.startswith("@")}
     if "卖点" in content:
         base["卖点"] = "".join(f'"{p}"' for p in content["卖点"])
         base["卖点数"] = len(content["卖点"])

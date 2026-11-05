@@ -31,16 +31,22 @@ def check_compare(content, images=None):
     err = lambda m: out.append(("ERROR", m))
     warn = lambda m: out.append(("WARN", m))
     for k in ("主标题", "副标题", "钩子", "产品1", "产品2"):
-        if not str(content.get(k, "")).strip():
+        if not content.get(k) or (isinstance(content.get(k), str) and not content[k].strip()):
             err(f"缺少字段或为空：{k}")
     for k in set(content) - COMPARE_FIELDS:
         warn(f"未知字段 {k}，不会进入 prompt")
     for k, limit in COMPARE_LIMITS.items():
-        t = content.get(k, "")
-        if '"' in t:
-            err(f"{k}「{t}」含英文双引号，会打乱 prompt；请改用中文引号“”")
-        if _len(t) > limit:
-            warn(f"{k}「{t}」约 {_len(t):g} 字，对比图建议不超过 {limit} 字")
+        v = content.get(k, "")
+        for t in (v if isinstance(v, list) else [v]):  # 列表 = 候选池，每张随机抽一句
+            if not isinstance(t, str) or not t.strip():
+                err(f"{k} 里有空内容")
+                continue
+            if '"' in t:
+                err(f"{k}「{t}」含英文双引号，会打乱 prompt；请改用中文引号“”")
+            if _len(t) > limit:
+                warn(f"{k}「{t}」约 {_len(t):g} 字，对比图建议不超过 {limit} 字")
+            if k == "钩子" and re.search(r"[A-Za-z0-9]", t):
+                warn(f"钩子「{t}」含英文或数字，错字风险更高")
     if not content.get("参考图"):
         for k in ("产品1", "产品2"):
             risky = _product_risk(content.get(k, ""))

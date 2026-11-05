@@ -31,19 +31,20 @@ def to_image_ref(src):
     return f"data:{mime};base64," + base64.b64encode(Path(src).read_bytes()).decode()
 
 
-def picks_for(style, a, i):
+def picks_for(style, a, i, content=None):
     if a.pick:
-        return P.pick(style, "index", indices=[int(x) for x in a.pick.split(",")])
+        return P.pick(style, "index", indices=[int(x) for x in a.pick.split(",")], content=content)
     if a.random is not None or a.count > 1:
-        return P.pick(style, "random", seed=(a.random or 0) + i)
-    return P.pick(style, "first")
+        return P.pick(style, "random", seed=(a.random or 0) + i, content=content)
+    return P.pick(style, "first", content=content)
 
 
 def run_one(client, style, content, idx, a, i, outdir, images):
     # 每张图一个 seed 并记录下来，方便复现；--seed 固定起始值
     seed = (a.seed + i) if a.seed is not None else random.randint(0, 2147483647)
     body = P.build_request(style, content, idx, n=a.n, seed=seed, images=images)
-    rec = {"no": i + 1, "picks": {c: style["options"][c][j - 1] for c, j in idx.items()},
+    rec = {"no": i + 1, "picks": {c: (style["options"][c][j - 1] if not c.startswith("@") else content[c[1:]][j - 1])
+                                  for c, j in idx.items()},
            "request": {**body, "image": "<参考图>"} if images else body}
     for attempt in range(4):  # 上游限流（upstream_rate_limited）时等待后重新提交
         try:
@@ -113,7 +114,7 @@ def main(argv=None):
 
     if a.cmd == "prompt":
         for i in range(a.count):
-            idx = picks_for(style, a, i)
+            idx = picks_for(style, a, i, content)
             p, neg = P.build(style, content, idx)
             print(json.dumps({"picks": idx, "prompt": p, "negative_prompt": neg}, ensure_ascii=False, indent=2))
         return
@@ -124,7 +125,7 @@ def main(argv=None):
     outdir.mkdir(parents=True)
     client = CRClient(key)
     with cf.ThreadPoolExecutor(max_workers=a.workers) as ex:
-        futs = [ex.submit(run_one, client, style, content, picks_for(style, a, i), a, i, outdir, images)
+        futs = [ex.submit(run_one, client, style, content, picks_for(style, a, i, content), a, i, outdir, images)
                 for i in range(a.count)]
         recs = sorted((f.result() for f in futs), key=lambda r: r["no"])
     (outdir / "result.json").write_text(json.dumps(recs, ensure_ascii=False, indent=2), encoding="utf-8")

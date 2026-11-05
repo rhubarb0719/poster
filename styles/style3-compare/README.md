@@ -12,8 +12,8 @@
 |---|---|
 | 主标题 | ≤6 字 |
 | 副标题 | ≤4 字，如“2选1” |
-| 钩子 | ≤8 字，写在对话框或底部横幅上，如“一篇看懂怎么选” |
-| 产品1 / 产品2 | 只写中文外观，不写型号 |
+| 钩子 | ≤8 字，可写多句（列表），每张随机抽一句；写在对话框或底部横幅上 |
+| 产品1 / 产品2 | 只写中文外观，不写型号和颜色；款式为十字对开门 |
 | 场景 | 可选，仅布局 1 用，默认“厨房一角” |
 
 用产品实拍图时加 `"参考图": true`，按 左、右 顺序传 2 张图（`--image 图1 图2`）。
@@ -55,6 +55,17 @@
 乱码, 错别字, 多余文字, 小字, 英文小字, 手写字, 型号, 产品名称标签, 毛笔字标签, 产品铭牌文字, 控制面板文字, 显示屏数字, 价格, 水印, logo, 空白对话框, 多余的对话框, 多余的空白标签, 产品变形, 两款产品大小不一, 产品重叠, 画面拥挤, 低分辨率
 ```
 
-## 样图
+## 样图（v2）
 
-v2 尚未出图。v1 样图（产品为洗烘套装，版式较简单）记录见 [`samples_v1.json`](samples_v1.json)。
+测试内容（两款均为十字对开门冰箱，不写颜色），链接可能过期；完整 prompt 和 seed 见 [`samples.json`](samples.json)。
+
+| 编号 | 钩子 | 钩子位置 | 布局 | 徽章 | 箭头 | 贴纸 | 图 |
+|---|---|---|---|---|---|---|---|
+| s3v2-1 | 到底怎么选？ | 底部横幅 | 卡片+厨房 | 柠檬黄五瓣花朵形 | 两款产品上方一个黑色手绘双向弧形箭头 | 一个柠檬黄圆形笑脸贴纸和一个四角闪光 | [看图](https://dashscope-a717.oss-accelerate.aliyuncs.com/1d/96/20261105/ed759433/bd15110c-9f13-4cc8-b671-894aec4b9a50_qwen_image3_serving_output_0.png?Expires=1793935944&OSSAccessKeyId=LTAI5tPxpiCM2hjmWrFXrym1&Signature=iJlX6ttJQZTjLO3RBIi1T5KQ2%2BE%3D) |
+| s3v2-2 | 一张图看懂 | 白色对话框 | 抠图+VS | 柠檬黄五瓣花朵形 | 一个黑色手绘弯曲虚线箭头 | 一个柠檬黄小皇冠和几道黑色放射短线 | [看图](https://dashscope-a717.oss-accelerate.aliyuncs.com/1d/0e/20261105/ed759433/99818f0f-5c29-4811-be88-05417b275637_qwen_image3_serving_output_0.png?Expires=1793935944&OSSAccessKeyId=LTAI5tPxpiCM2hjmWrFXrym1&Signature=olNofyE0hW6s3duwODl0LNip5V0%3D) |
+| s3v2-3 | 选前必看 | 白色对话框 | 卡片+厨房 | 橙色圆形 | 一个黑色手绘弧形箭头 | 两个柠檬黄五角星和一个四角闪光 | [看图](https://dashscope-a717.oss-accelerate.aliyuncs.com/1d/0c/20261105/ed759433/d730d8ef-62c5-4256-8c68-45864a0edbbf_qwen_image3_serving_output_0.png?Expires=1793935946&OSSAccessKeyId=LTAI5tPxpiCM2hjmWrFXrym1&Signature=joKfpqcb%2Bg3JQTGQGTBR%2FyWiF00%3D) |
+| s3v2-4 | 到底怎么选？ | 白色对话框 | 卡片+厨房 | 橙色圆形 | 两款产品上方一个黑色手绘双向弧形箭头 | 一个柠檬黄圆形笑脸贴纸和一个四角闪光 | [看图](https://dashscope-a717.oss-accelerate.aliyuncs.com/1d/1a/20261105/ed759433/60996513-9601-461d-9d30-d54ab583720f_qwen_image3_serving_output_0.png?Expires=1793935970&OSSAccessKeyId=LTAI5tPxpiCM2hjmWrFXrym1&Signature=NA0%2Bn9BmLRv2s8HUORDIZC6DP0k%3D) |
+| s3v2-5 | 嵌进橱柜刚刚好 | 底部横幅 | 卡片+厨房 | 黄色实心圆形 | 两个短粗的黑色手绘箭头 | 两个柠檬黄五角星和一个四角闪光 | [看图](https://dashscope-a717.oss-accelerate.aliyuncs.com/1d/3f/20261105/ed759433/311c93ac-314b-4e8f-a3cc-05d381124b7b_qwen_image3_serving_output_0.png?Expires=1793936010&OSSAccessKeyId=LTAI5tPxpiCM2hjmWrFXrym1&Signature=XSyRyBC%2Bb0lM7BFW4w0cj6AUN3A%3D) |
+| s3v2-6 | 看完不踩坑 | 白色对话框 | 抠图+VS | 橙色圆形 | 一个黑色手绘弧形箭头 | 一个红色爱心和两个柠檬黄小星星 | [看图](https://dashscope-a717.oss-accelerate.aliyuncs.com/1d/ae/20261105/ed759433/51657887-9249-40bd-8053-066c3a54b8d8_qwen_image3_serving_output_0.png?Expires=1793935971&OSSAccessKeyId=LTAI5tPxpiCM2hjmWrFXrym1&Signature=GVc1f%2BrIYk3jGkKxVIiO9pbfmKQ%3D) |
+
+v1 样图（产品为洗烘套装，版式较简单）记录见 [`samples_v1.json`](samples_v1.json)。
